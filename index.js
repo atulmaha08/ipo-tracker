@@ -1,17 +1,31 @@
 // Static company names
-const dematAccountNames = ["Aai", "Atul", "Sonali", "Vikky", "Mitesh", "Vandana", "Vikas", "Sanket", "Mitali"];
+const dematAccountNames = [
+  "Aai",
+  "Atul",
+  "Sonali",
+  "Vikky",
+  "Mitesh",
+  "Vandana",
+  "Vikas",
+  "Sanket",
+  "Mitali",
+];
 
 // Dropdown options
 const dropdownOptions = [
-  "Aai Sarswat", "Aai Hdfc", "Atul HDFC", 
-  "Sonali Joint", "Sonali HDFC", "Vikky Union"
+  "Aai Sarswat",
+  "Aai Hdfc",
+  "Atul HDFC",
+  "Sonali Joint",
+  "Sonali HDFC",
+  "Vikky Union",
 ];
 
 // Data store keyed by date
 const ipoData = {};
 
 // Load data from localStorage on page start
-window.onload = function() {
+window.onload = function () {
   const storedData = localStorage.getItem("ipoData");
   if (storedData) {
     Object.assign(ipoData, JSON.parse(storedData));
@@ -54,17 +68,27 @@ function renderDate(date) {
              oninput="updateIPOName('${date}', ${index}, this.value)">
       <button onclick="deleteIPO('${date}', ${index})" style="float:right; background:#f44336; color:white; border:none; padding:5px 10px; cursor:pointer;">Delete</button>
       <div>
-        ${dematAccountNames.map((c) => `
-          <div class="company-row">
-            <span>${c}</span>
-            <select onchange="updateSelection('${date}', ${index}, '${c}', this.value)">
-              <option value="">Select</option>
-              ${dropdownOptions.map(opt => `
-                <option value="${opt}" ${ipo.selections[c]===opt?"selected":""}>${opt}</option>
-              `).join("")}
-            </select>
-          </div>
-        `).join("")}
+      ${dematAccountNames
+        .map(
+          (c, i) => `
+        <div class="company-row">
+        <span>${i + 1}. ${c}</span>
+        <select onchange="updateSelection('${date}', ${index}, '${c}', this.value)">
+          <option value="">Select</option>
+          ${dropdownOptions
+            .map(
+              (opt) => `
+          <option value="${opt}" ${
+                ipo.selections[c] === opt ? "selected" : ""
+              }>${opt}</option>
+          `
+            )
+            .join("")}
+        </select>
+        </div>
+      `
+        )
+        .join("")}
       </div>
     `;
 
@@ -104,12 +128,12 @@ function renderSummary(date) {
   const counts = {};
 
   // Initialize counts
-  dropdownOptions.forEach(opt => counts[opt] = 0);
+  dropdownOptions.forEach((opt) => (counts[opt] = 0));
 
   let hasSelection = false;
 
   // Count selections
-  ipoData[date].forEach(ipo => {
+  ipoData[date].forEach((ipo) => {
     for (const company in ipo.selections) {
       const val = ipo.selections[company];
       if (val) {
@@ -127,7 +151,7 @@ function renderSummary(date) {
 
   // Build summary HTML
   let summaryHTML = `<h3>Summary for ${date}</h3><div class="summary">`;
-  dropdownOptions.forEach(opt => {
+  dropdownOptions.forEach((opt) => {
     if (counts[opt] > 0) {
       summaryHTML += `<div>${opt}: ${counts[opt]} Requests</div>`;
     }
