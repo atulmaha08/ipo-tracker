@@ -1,0 +1,41 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.date-section {
+    margin-bottom: 20px;
+}
+
+.company-row {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.company-row span {
+    width: 150px;
+}
+
+.summary {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #999;
+    background: #f9f9f9;
+    width: fit-content;
+}
+
+.ipo-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ipo-block {
+    flex: 1 1 calc(33.33% - 20px);
+    box-sizing: border-box;
+    min-width: 300px;
+    max-width: 400px;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
