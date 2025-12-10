@@ -1,28 +1,42 @@
 // Static company names
-    const dematAccountNames = ["Aai", "Atul", "Sonali", "Vikky", "Mitesh", "Vandana", "Vikas", "Sanket", "Mitali"];
+const dematAccountNames = ["Aai", "Atul", "Sonali", "Vikky", "Mitesh", "Vandana", "Vikas", "Sanket", "Mitali"];
 
-    // Dropdown options (same style as dematAccountNames, but you can customize)
-    const dropdownOptions = [
-      "Aai Sarswat", "Aai Hdfc", "Atul HDFC", 
-      "Sonali Joint", "Sonali HDFC", "Vikky Union"
-    ];
+// Dropdown options
+const dropdownOptions = [
+  "Aai Sarswat", "Aai Hdfc", "Atul HDFC", 
+  "Sonali Joint", "Sonali HDFC", "Vikky Union"
+];
 
-    // Data store keyed by date
-    const ipoData = {};
+// Data store keyed by date
+const ipoData = {};
 
-    function loadDate() {
-      const date = document.getElementById("datePicker").value;
-      if (!date) {
-        alert("Please select a date!");
-        return;
-      }
-      if (!ipoData[date]) {
-        ipoData[date] = []; // initialize empty IPO list for this date
-      }
-      renderDate(date);
-    }
+// Load data from localStorage on page start
+window.onload = function() {
+  const storedData = localStorage.getItem("ipoData");
+  if (storedData) {
+    Object.assign(ipoData, JSON.parse(storedData));
+  }
+};
 
-    function renderDate(date) {
+// Save data to localStorage
+function saveData() {
+  localStorage.setItem("ipoData", JSON.stringify(ipoData));
+}
+
+function loadDate() {
+  const date = document.getElementById("datePicker").value;
+  if (!date) {
+    alert("Please select a date!");
+    return;
+  }
+  if (!ipoData[date]) {
+    ipoData[date] = []; // initialize empty IPO list for this date
+    saveData();
+  }
+  renderDate(date);
+}
+
+function renderDate(date) {
   const container = document.getElementById("ipoContainer");
   container.innerHTML = `<h3>IPO List for ${date}</h3>
     <button onclick="addIPO('${date}')">Add IPO Name</button>
@@ -35,24 +49,24 @@
     block.className = "ipo-block";
 
     block.innerHTML = `
-  <label>IPO Name: </label>
-  <input type="text" value="${ipo.name}" 
-         oninput="updateIPOName('${date}', ${index}, this.value)">
-  <button onclick="deleteIPO('${date}', ${index})" style="float:right; background:#f44336; color:white; border:none; padding:5px 10px; cursor:pointer;">Delete</button>
-  <div>
-    ${dematAccountNames.map((c) => `
-      <div class="company-row">
-        <span>${c}</span>
-        <select onchange="updateSelection('${date}', ${index}, '${c}', this.value)">
-          <option value="">Select</option>
-          ${dropdownOptions.map(opt => `
-            <option value="${opt}" ${ipo.selections[c]===opt?"selected":""}>${opt}</option>
-          `).join("")}
-        </select>
+      <label>IPO Name: </label>
+      <input type="text" value="${ipo.name}" 
+             oninput="updateIPOName('${date}', ${index}, this.value)">
+      <button onclick="deleteIPO('${date}', ${index})" style="float:right; background:#f44336; color:white; border:none; padding:5px 10px; cursor:pointer;">Delete</button>
+      <div>
+        ${dematAccountNames.map((c) => `
+          <div class="company-row">
+            <span>${c}</span>
+            <select onchange="updateSelection('${date}', ${index}, '${c}', this.value)">
+              <option value="">Select</option>
+              ${dropdownOptions.map(opt => `
+                <option value="${opt}" ${ipo.selections[c]===opt?"selected":""}>${opt}</option>
+              `).join("")}
+            </select>
+          </div>
+        `).join("")}
       </div>
-    `).join("")}
-  </div>
-`;
+    `;
 
     listContainer.appendChild(block);
   });
@@ -60,28 +74,32 @@
   renderSummary(date);
 }
 
-    function addIPO(date) {
-      ipoData[date].push({ name: "", selections: {} });
-      renderDate(date);
-    }
+function addIPO(date) {
+  ipoData[date].push({ name: "", selections: {} });
+  saveData();
+  renderDate(date);
+}
 
-    function updateIPOName(date, index, value) {
-      ipoData[date][index].name = value;
-    }
+function updateIPOName(date, index, value) {
+  ipoData[date][index].name = value;
+  saveData();
+}
 
-    function updateSelection(date, index, company, value) {
-      ipoData[date][index].selections[company] = value;
-      renderSummary(date);
-    }
-	
-	function deleteIPO(date, index) {
+function updateSelection(date, index, company, value) {
+  ipoData[date][index].selections[company] = value;
+  saveData();
+  renderSummary(date);
+}
+
+function deleteIPO(date, index) {
   if (confirm("Are you sure you want to delete this IPO entry?")) {
     ipoData[date].splice(index, 1);
+    saveData();
     renderDate(date);
   }
 }
 
-    function renderSummary(date) {
+function renderSummary(date) {
   const summaryContainer = document.getElementById("summaryContainer");
   const counts = {};
 
@@ -117,4 +135,35 @@
   summaryHTML += `</div>`;
 
   summaryContainer.innerHTML = summaryHTML;
+}
+
+// Clear only selected date
+function clearDateData() {
+  const date = document.getElementById("datePicker").value;
+  if (!date) {
+    alert("Please select a date first!");
+    return;
+  }
+
+  if (confirm(`Are you sure you want to clear all IPO data for ${date}?`)) {
+    delete ipoData[date];
+    saveData();
+
+    document.getElementById("ipoContainer").innerHTML = "";
+    document.getElementById("summaryContainer").innerHTML = "";
+    alert(`IPO data for ${date} has been cleared.`);
+  }
+}
+
+// Clear all dates
+function clearAllData() {
+  if (confirm("Are you sure you want to clear ALL IPO data?")) {
+    localStorage.removeItem("ipoData");
+    for (const key in ipoData) {
+      delete ipoData[key];
+    }
+    document.getElementById("ipoContainer").innerHTML = "";
+    document.getElementById("summaryContainer").innerHTML = "";
+    alert("All IPO data cleared.");
+  }
 }
